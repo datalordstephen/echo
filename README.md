@@ -8,6 +8,9 @@ The project is designed for **Scalability** and **Ease of Deployment**, featurin
 *   **Modern Tooling**: Managed by `uv` for lightning-fast dependency resolution.
 *   **Containerization**: Docker-ready for **Railway** (Recommended) or AWS Lambda.
 
+## Live Demo
+🚀 **Deployed API**: [https://echo-production-a131.up.railway.app/docs](https://echo-production-a131.up.railway.app/docs)
+
 ## Table of Contents
 - [Problem Statement](#problem-statement)
 - [Dataset](#dataset)
@@ -113,7 +116,13 @@ You can test predictions using the helper script:
 python src/predict.py
 ```
 
-### 4. Run the API Locally
+### 4. Test Deployed API
+We have a test script to check the live Railway deployment:
+```bash
+python test_api.py
+```
+
+### 5. Run the API Locally
 Start the FastAPI server using Uvicorn:
 ```bash
 uvicorn src.api:app --reload
@@ -158,14 +167,14 @@ This project is configured for zero-config deployment on [Railway](https://railw
 Uploads an audio file for classification.
 
 **Request:** `multipart/form-data`
-*   `file`: `.wav` audio file.
+*   `file`: `example.wav` audio file. (in this repo)
 
 **Response:**
 ```json
 {
-  "class": "siren",
-  "class_id": 8,
-  "confidence": 0.99
+    "class": "dog_bark",
+    "class_id": 3,
+    "confidence": 0.9982712268829346
 }
 ```
 
