@@ -1,6 +1,6 @@
-# Echo - Multi-Class Audio Classifier
+# Echo: Intelligent Urban Sound Classification
 
-Echo is a production-ready, deep learning-based audio classification system designed to identify urban sounds. It leverages **ResNet18** (adapted for 1-channel Spectrograms) to achieve high accuracy on the **UrbanSound8K** dataset. 
+Echo is a high-performance, production-ready audio classification system designed to automatically detect and categorize environmental noise in urban settings. Built with PyTorch and optimized via ONNX, Echo provides a scalable solution for real-time acoustic monitoring.
 
 The project is designed for **Scalability** and **Ease of Deployment**, featuring:
 *   **Modular Architecture**: Split into `train`, `predict`, and `api`.
@@ -20,7 +20,17 @@ The project is designed for **Scalability** and **Ease of Deployment**, featurin
 ---
 
 ## Problem Statement
-Urban noise pollution significantly impacts quality of life. Echo automates the classification of urban sounds (e.g., sirens, drilling, playing children) to enable real-time noise monitoring solutions.
+In the rapidly growing urban landscape, noise pollution has become a critical environmental concern affecting public health, safety, and urban planning. Monitoring these acoustic environments manually is labor-intensive and impossible to scale.
+
+City planners, security agencies, and environmental researchers need an automated way to:
+
+Identify specific noise sources: Differentiating between harmless "street music" and critical "sirens" or "gunshots."
+
+Monitor Noise Pollution: Mapping the intensity and frequency of industrial sounds like "drilling" or "jackhammers."
+
+Trigger Real-time Responses: Enabling smart city infrastructure to react instantly when specific emergency sounds are detected.
+
+Echo solves these challenges by providing a robust deep-learning pipeline that converts raw audio into actionable data, optimized for low-latency deployment in serverless environments.
 
 ## Dataset
 **UrbanSound8K**: 8,732 labeled sound excerpts (<= 4s) from 10 classes:
@@ -69,6 +79,7 @@ We use `uv` to manage two sets of dependencies:
 **To install EVERYTHING (for development/training):**
 ```bash
 uv sync --extra training
+uv sync # development only
 ```
 
 **Activate the Virtual Environment:**
