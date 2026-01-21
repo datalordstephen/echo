@@ -1,125 +1,159 @@
-# Sentinel - Multi-Class Audio Classifier
+# Echo - Multi-Class Audio Classifier
 
-Sentinel is a deep learning-based audio classification system designed to identify urban sounds. It leverages **ResNet18** and **Mel-Spectrograms** to achieve high accuracy on the **UrbanSound8K** dataset. The project is refactored for production, featuring a reduced-dependency inference pipeline and a Dockerized API ready for **AWS Lambda**.
+Echo is a production-ready, deep learning-based audio classification system designed to identify urban sounds. It leverages **ResNet18** (adapted for 1-channel Spectrograms) to achieve high accuracy on the **UrbanSound8K** dataset. 
+
+The project is designed for **Scalability** and **Ease of Deployment**, featuring:
+*   **Modular Architecture**: Split into `train`, `predict`, and `api`.
+*   **Fast Inference**: Uses `ONNX Runtime` and `Librosa` (No PyTorch dependency in production).
+*   **Modern Tooling**: Managed by `uv` for lightning-fast dependency resolution.
+*   **Containerization**: Docker-ready for **Railway** (Recommended) or AWS Lambda.
 
 ## Table of Contents
 - [Problem Statement](#problem-statement)
 - [Dataset](#dataset)
 - [Project Structure](#project-structure)
-- [EDA](#eda)
-- [Modelling](#modelling)
-- [Deployment/Containerization](#deploymentcontainerization)
-- [API Usage](#api-usage)
+- [Detailed Setup & Installation](#detailed-setup--installation)
+- [Usage (Training & Inference)](#usage-training--inference)
+- [Dockerization & Deployment](#dockerization--deployment)
+- [API Documentation](#api-documentation)
 
 ---
 
 ## Problem Statement
-Urban noise pollution is a growing environmental concern. Automatically classifying sounds (e.g., jackhammers, sirens, playing children) can enable smart city monitoring systems to assess noise levels and sources in real-time. This project aims to build a robust classifier that can take raw audio input and output the sound category with high confidence.
+Urban noise pollution significantly impacts quality of life. Echo automates the classification of urban sounds (e.g., sirens, drilling, playing children) to enable real-time noise monitoring solutions.
 
 ## Dataset
-The project uses the **UrbanSound8K** dataset, which contains **8,732 labeled sound excerpts** (<= 4 seconds) from 10 classes:
-1. Air Conditioner
-2. Car Horn
-3. Children Playing
-4. Dog Bark
-5. Drilling
-6. Engine Idling
-7. Gun Shot
-8. Jackhammer
-9. Siren
-10. Street Music
-
-The data is pre-sorted into 10 folds for cross-validation.
+**UrbanSound8K**: 8,732 labeled sound excerpts (<= 4s) from 10 classes:
+*   `air_conditioner`, `car_horn`, `children_playing`, `dog_bark`, `drilling`
+*   `engine_idling`, `gun_shot`, `jackhammer`, `siren`, `street_music`
 
 ## Project Structure
-The repository follows a clean, production-ready structure managed by `uv`:
-
 ```
-sentinel/
+echo/
 ├── model/                     # Stores ONNX models and checkpoints
-│   └── echo_audio_clf.onnx    # Final exported quantization-ready model
+│   └── echo_audio_clf.onnx    # Optimized Inference Model
 ├── src/                       # Source code
-│   ├── api.py                 # FastAPI application & Lambda Handler
-│   ├── predict.py             # Inference logic (ONNXRuntime + Librosa)
-│   └── train.py               # Training pipeline (PyTorch)
-├── Dockerfile                 # AWS Lambda-optimized Docker image
-├── pyproject.toml             # Dependency management (Base vs Training)
-├── uv.lock                    # Exact dependency versions
-└── README.md                  # Project documentation
+│   ├── api.py                 # FastAPI Application
+│   ├── predict.py             # Inference Logic (ONNX + Librosa)
+│   └── train.py               # Training Pipeline (PyTorch)
+├── Dockerfile                 # Production Docker Image
+├── pyproject.toml             # Dependencies (Base vs Training)
+├── uv.lock                    # Locked Checksums
+└── README.md                  # Documentation
 ```
 
-## EDA (Exploratory Data Analysis)
-Key insights driven by data analysis:
-*   **Class Imbalance**: Some classes (e.g., *car_horn*, *gun_shot*) have fewer samples. We implemented **Class Weighting** (`balanced`) in the CrossEntropyLoss to mitigate this.
-*   **Variable Lengths**: Audio clips vary from <1s to 4s. The preprocessing pipeline standardizes inputs by padding (silence) or truncating to exactly **4 seconds**.
-*   **Spectrograms**: Visual inspection of Mel-Spectrograms showed distinct patterns for classes like *siren* (continuous lines) vs *jackhammer* (repetitive bursts), confirming CNNs as a viable architecture.
+---
 
-## Modelling
-We treat audio classification as an image classification problem using **Transfer Learning**.
+## Detailed Setup & Installation
 
-*   **Input**: Raw Audio Waveform -> Log Mel-Spectrogram (1 Channel).
-*   **Preprocessing**: 
-    *   Resample to 22.05kHz.
-    *   Convert Stereo to Mono.
-    *   Generate MelSpectrogram (128 bands).
-    *   Convert to Decibels (Log scale).
-*   **Augmentation** (Training only):
-    *   **Frequency Masking**: Randomly masks frequency bands.
-    *   **Time Masking**: Randomly masks time steps.
-*   **Architecture**:
-    *   **Backbone**: **ResNet18** (Pretrained on ImageNet).
-    *   **Modification**: First Convolutional layer modified to accept 1 channel (instead of 3).
-    *   **Head**: Dropout (`p=0.7`) + Fully Connected Layer (10 outputs).
-*   **Optimization**:
-    *   **Optimizer**: Adam (`lr=1e-4`, `weight_decay=1e-4`).
-    *   **Loss**: Weighted CrossEntropyLoss.
-    *   **Early Stopping**: Monitors validation F1-score with patience of 3 epochs.
+Follow these steps to set up the project locally.
 
-## Deployment/Containerization
-The project is containerized for easy deployment on **Railway** (Recommended) or **AWS Lambda**:
+### 1. Prerequisites
+*   **Python 3.12+**
+*   **uv** (Package Manager): [Install Guide](https://github.com/astral-sh/uv)
+    ```bash
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    ```
 
-1.  **Lightweight Inference**: PyTorch is stripped out of the inference container. We use `onnxruntime` and `numpy`/`librosa` for prediction.
-2.  **Package Management**: Uses `uv` for extremely fast resolution and installation.
-3.  **Docker**:
-    *   Base Image: `python:3.12-slim`.
-    *   Installs system libs (`libsndfile`).
-    *   Syncs only production dependencies from `uv.lock`.
-    *   Runs `uvicorn` on `$PORT`.
-
-**Railway Deployment:**
-Simply connect this repository to Railway. It will automatically detect the Dockerfile and deploy.
-
-**Build Command (Local):**
+### 2. Clone the Repository
 ```bash
-docker build -t sentinel-app .
+git clone https://github.com/your-username/echo.git
+cd echo
 ```
 
-## API Usage
-The application exposes a REST API via FastAPI.
+### 3. Install Dependencies
+We use `uv` to manage two sets of dependencies:
+*   **Base**: Lightweight, for running the API/Inference.
+*   **Training**: Heavy, includes PyTorch (for training only).
 
-### Endpoint: Predict Audio
-**POST** `/predict`
+**To install EVERYTHING (for development/training):**
+```bash
+uv sync --extra training
+```
+
+**Activate the Virtual Environment:**
+```bash
+source .venv/bin/activate
+```
+
+---
+
+## Usage (Training & Inference)
+
+### 1. Prepare Data
+Ensure the **UrbanSound8K** dataset is located in the `urbansound8k/` directory in the project root.
+
+### 2. Train the Model
+This will run the training loop, validate on the hold-out fold, and export the generic ONNX model to `model/echo_audio_clf.onnx`.
+```bash
+python src/train.py
+```
+
+### 3. Run Inference (CLI)
+You can test predictions using the helper script:
+```bash
+# Edit the script to point to your .wav file
+python src/predict.py
+```
+
+### 4. Run the API Locally
+Start the FastAPI server using Uvicorn:
+```bash
+uvicorn src.api:app --reload
+```
+Test it at `http://localhost:8000/docs`.
+
+---
+
+## Dockerization & Deployment
+
+### Run with Docker (Locally)
+The strict separation of `base` vs `training` dependencies ensures our Docker image is small (no PyTorch).
+
+1.  **Build the Image:**
+    ```bash
+    docker build -t echo-app .
+    ```
+
+2.  **Run the Container:**
+    ```bash
+    docker run -p 8000:8000 -e PORT=8000 echo-app
+    ```
+
+3.  **Test:**
+    ```bash
+    curl -X POST "http://localhost:8000/predict" -F "file=@test.wav"
+    ```
+
+### Deploy to Railway (Recommended)
+This project is configured for zero-config deployment on [Railway](https://railway.app/).
+
+1.  Push this code to a GitHub repository.
+2.  Login to Railway and click **"New Project"**.
+3.  Select **"Deploy from GitHub repo"** and choose `echo`.
+4.  Railway detects the `Dockerfile` and deploys automatically.
+
+---
+
+## API Documentation
+
+### POST `/predict`
+Uploads an audio file for classification.
 
 **Request:** `multipart/form-data`
-- `file`: The audio file (`.wav`) to classify.
+*   `file`: `.wav` audio file.
 
-**Example Request:**
-```bash
-curl -X POST "http://localhost:8000/predict" \
-  -F "file=@/path/to/my_audio.wav"
-```
-
-**Example Response:**
+**Response:**
 ```json
 {
-  "class": "dog_bark",
-  "class_id": 3,
-  "confidence": 0.98
+  "class": "siren",
+  "class_id": 8,
+  "confidence": 0.99
 }
 ```
 
-### Endpoint: Health Check
-**GET** `/health`
+### GET `/health`
+Health check endpoint.
 ```json
 {
   "status": "healthy",

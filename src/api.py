@@ -4,16 +4,16 @@ import shutil
 import os
 import tempfile
 import logging
-from src.predict import SentinelPredictor
+from src.predict import EchoPredictor
 
 # Setup Logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-logger = logging.getLogger("sentinel_api")
+logger = logging.getLogger("echo_api")
 
-app = FastAPI(title="Sentinel Audio Classifier API")
+app = FastAPI(title="Echo Audio Classifier API")
 
 # Global Predictor
 predictor = None
@@ -24,7 +24,7 @@ async def startup_event():
     global predictor
     if os.path.exists(MODEL_PATH):
         try:
-            predictor = SentinelPredictor(MODEL_PATH)
+            predictor = EchoPredictor(MODEL_PATH)
             logger.info("Model loaded successfully.")
         except Exception as e:
             logger.error(f"Failed to load model: {e}")

@@ -9,7 +9,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-logger = logging.getLogger("sentinel_predict")
+logger = logging.getLogger("echo_predict")
 
 CLASS_NAMES = [
     'air_conditioner', 'car_horn', 'children_playing', 'dog_bark', 'drilling',
@@ -20,7 +20,7 @@ SAMPLE_RATE = 22050
 DURATION = 4
 TARGET_SAMPLES = SAMPLE_RATE * DURATION
 
-class SentinelPredictor:
+class EchoPredictor:
     def __init__(self, model_path):
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model not found at {model_path}")
@@ -112,7 +112,7 @@ class SentinelPredictor:
 if __name__ == "__main__":
     # Example Usage
     MODEL_PATH = os.path.join("model", "echo_audio_clf.onnx")
-    predictor = SentinelPredictor(MODEL_PATH)
+    predictor = EchoPredictor(MODEL_PATH)
     
     # Create a dummy file for testing if none exist
     # import soundfile as sf

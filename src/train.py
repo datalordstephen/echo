@@ -24,7 +24,7 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-logger = logging.getLogger("sentinel_train")
+logger = logging.getLogger("echo_train")
 
 # Constants
 SAMPLE_RATE = 22050
@@ -275,7 +275,7 @@ def main():
             best_val_acc = val_acc
             patience_counter = 0
             
-            save_path = os.path.join(MODEL_SAVE_DIR, 'sentinel_best.pth')
+            save_path = os.path.join(MODEL_SAVE_DIR, 'echo_best.pth')
             torch.save(model.state_dict(), save_path)
             logger.info(f"New Best F1! Model saved to {save_path}")
         else:
@@ -288,8 +288,8 @@ def main():
     # Export
     # Reload best model before export?
     # echo.py reloads it. It's safer.
-    if os.path.exists(os.path.join(MODEL_SAVE_DIR, 'sentinel_best.pth')):
-        model.load_state_dict(torch.load(os.path.join(MODEL_SAVE_DIR, 'sentinel_best.pth')))
+    if os.path.exists(os.path.join(MODEL_SAVE_DIR, 'echo_best.pth')):
+        model.load_state_dict(torch.load(os.path.join(MODEL_SAVE_DIR, 'echo_best.pth')))
         
     export_to_onnx(model, device)
 

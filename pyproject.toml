@@ -1,5 +1,5 @@
 [project]
-name = "sentinel"
+name = "echo"
 version = "0.1.0"
 description = "UrbanSound8K Audio Classifier"
 requires-python = ">=3.12"
