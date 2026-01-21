@@ -81,7 +81,13 @@ source .venv/bin/activate
 ## Usage (Training & Inference)
 
 ### 1. Prepare Data
-Ensure the **UrbanSound8K** dataset is located in the `urbansound8k/` directory in the project root.
+We use `soundata` to automatically download and validate the **UrbanSound8K** dataset.
+
+Run the download script:
+```bash
+python src/download_data.py
+```
+This will download the dataset to `urbansound8k/` in the project root.
 
 ### 2. Train the Model
 This will run the training loop, validate on the hold-out fold, and export the generic ONNX model to `model/echo_audio_clf.onnx`.

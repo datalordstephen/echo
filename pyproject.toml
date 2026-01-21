@@ -23,6 +23,7 @@ training = [
     "tqdm",
     "scikit-learn",
     "matplotlib",
+    "soundata",
 ]
 
 [build-system]
