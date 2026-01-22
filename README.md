@@ -2,6 +2,8 @@
 
 Echo is a high-performance, production-ready audio classification system designed to automatically detect and categorize environmental noise in urban settings. Built with PyTorch and optimized via ONNX, Echo provides a scalable solution for real-time acoustic monitoring.
 
+> **Note**: If `notebook.ipynb` isn't showing normally, please try opening it in an incognito tab.
+
 The project is designed for **Scalability** and **Ease of Deployment**, featuring:
 *   **Modular Architecture**: Split into `train`, `predict`, and `api`.
 *   **Fast Inference**: Uses `ONNX Runtime` and `Librosa` (No PyTorch dependency in production).
