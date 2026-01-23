@@ -1,10 +1,11 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 import shutil
 import os
 import tempfile
 import logging
-from src.predict import EchoPredictor
+from .predict import EchoPredictor
 
 # Setup Logging
 logging.basicConfig(
@@ -14,6 +15,15 @@ logging.basicConfig(
 logger = logging.getLogger("echo_api")
 
 app = FastAPI(title="Echo Audio Classifier API")
+
+# CORS middleware for frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Global Predictor
 predictor = None
@@ -44,14 +54,14 @@ async def predict_audio(file: UploadFile = File(...)):
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
         shutil.copyfileobj(file.file, tmp)
         tmp_path = tmp.name
-    
+
     try:
         logger.info(f"Processing upload: {file.filename}")
         result = predictor.predict_single(tmp_path)
-        
+
         if result is None:
-             raise HTTPException(status_code=400, detail="Could not process audio file.")
-             
+            raise HTTPException(status_code=400, detail="Could not process audio file.")
+
         return result
 
     except Exception as e:

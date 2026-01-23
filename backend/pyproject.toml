@@ -1,0 +1,22 @@
+[project]
+name = "echo-backend"
+version = "0.1.0"
+description = "Echo Urban Sound Classification API"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "mangum",
+    "python-multipart",
+    "onnxruntime",
+    "librosa",
+    "soundfile",
+    "numpy",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
